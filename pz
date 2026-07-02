@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# One entry point for the PZ build tooling (no `make` needed). Auto-adds node.
+set -euo pipefail
+cd "$(dirname "$0")"
+for _nb in "$PWD"/.node/*/bin; do [ -d "$_nb" ] && export PATH="$_nb:$PATH" && break; done
+cmd="${1:-help}"; shift 2>/dev/null || true
+case "$cmd" in
+  update)   ./update.sh ;;
+  rebuild)  ./rebuild.sh ;;
+  parse)    ./parse_all.sh ;;
+  links)    ./refresh_links.sh "$@" ;;
+  images)   python3 fetch_images.py "$@" ;;
+  build)    ./build_site.sh ;;
+  version)  python3 version_check.py "$@" ;;
+  diff)     python3 diff_data.py "$@" ;;
+  validate) python3 validate_schema.py ;;
+  verify)   node verify_dom.js "$@" ;;
+  *) echo "usage: ./pz {update|rebuild|parse|links|build|version|diff|validate|verify OLD NEW|images}";;
+esac

@@ -1,0 +1,13 @@
+# Generated / cached data — regenerated from the game files by `pz.py`
+work/
+
+# Local, untracked config (your author name, site URL, path overrides)
+pz.env.local
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Node deps for the optional jsdom render check — reinstall with `npm install`
+node_modules/
+.node/
