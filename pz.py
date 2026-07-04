@@ -11,7 +11,8 @@ PY = sys.executable
 DATASETS = ["seeds", "vehicles", "animals", "guns", "melee", "tools", "recipes", "food", "forage", "xp", "fishing"]
 BUILDERS = ["build_html", "build_cars_html", "build_livestock_html", "build_guns_html",
             "build_melee_html", "build_tools_html", "build_crafting", "build_food_html",
-            "build_forage_html", "build_xp_html", "build_fishing_html", "build_thumbs", "build_sw"]
+            "build_forage_html", "build_xp_html", "build_fishing_html", "build_thumbs", "build_sw",
+            "build_map_html"]
 
 def _run(args):
     r = subprocess.run(args)

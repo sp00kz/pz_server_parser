@@ -70,6 +70,7 @@ TABLE_JS = r'''function buildTable(CFG){
 
 # Site nav definition; nav(active) returns the <nav> markup with the current page marked active.
 NAV_TABS = [
+    ('map.html', '🗺️ Map'),
     ('index.html', '🏠 Home'), ('seeds.html', '🌱 Seeds'), ('cars.html', '🚗 Vehicles'), ('livestock.html', '🐄 Livestock'),
     ('guns.html', '🔫 Guns'), ('melee.html', '🗡️ Melee'), ('tools.html', '🧰 Tools'),
     ('crafting.html', '🛠️ Crafting'), ('food.html', '🍎 Food'), ('foraging.html', '🌲 Foraging'),

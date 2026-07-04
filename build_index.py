@@ -5,6 +5,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import pzenv, pzbuild
 
 DESC = {
+ 'map.html':       'Interactive isometric map — vanilla Knox County plus installed mod maps, buildings coloured by loot type.',
  'seeds.html':     'Crop growth time, water needs, sow months and yields.',
  'cars.html':      'Speed, engine, trunk and seats — base game plus Workshop mods.',
  'livestock.html': 'Animals, breeds, products and gestation.',
