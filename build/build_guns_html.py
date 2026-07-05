@@ -46,6 +46,10 @@ SLOT = {'Scope':'Sight / Optic', 'Canon':'Barrel / Rail', 'Sling':'Sling', 'Reco
 
 def effects(kv):
     e = []  # g: 1 good, -1 bad, 0 neutral
+    # suppression is lua-side; the reduction is only stated in the item Tooltip
+    m = re.search(r'soundradius\s*:\s*(-\d+%?)', kv.get('Tooltip', '') or '', re.I)
+    if m:
+        e.append({'t': f"{m.group(1)} sound radius", 'g': 1})
     if 'MaxSightRange' in kv:
         e.append({'t': f"Sight range {fmtn(kv.get('MinSightRange','?'))}–{fmtn(kv['MaxSightRange'])} tiles", 'g': 1})
     at = fnum(kv.get('AimingTimeModifier'))
@@ -71,12 +75,25 @@ def effects(kv):
         e.append({'t': f"+{fmtn(kv['WeightModifier'])} weight", 'g': 0})
     return e
 
-parts = []
-for kv in parse_blocks(PARTF):
+parts, pslot, psrc = [], {}, {}
+def add_part(kv, src):
     mount = [x.strip().replace('Base.', '') for x in (kv.get('MountOn', '') or '').split(';') if x.strip()]
-    parts.append({'id': kv['id'], 'name': pnames.get(kv['id'], kv['id']),
-                  'slot': SLOT.get(kv.get('PartType',''), kv.get('PartType','Other')),
-                  'mount': mount, 'effects': effects(kv)})
+    rec = {'id': kv['id'], 'name': pnames.get(kv['id']) or kv.get('DisplayName') or kv['id'],
+           'slot': SLOT.get(kv.get('PartType',''), kv.get('PartType','Other')),
+           'mount': mount, 'effects': effects(kv)}
+    at = pslot.get(kv['id'])
+    if at is None:
+        pslot[kv['id']] = len(parts); psrc[kv['id']] = src; parts.append(rec)
+    elif src != 'Vanilla' and psrc[kv['id']] == 'Vanilla':
+        parts[at] = rec; psrc[kv['id']] = src   # mod redefinition wins (game load order)
+
+for kv in parse_blocks(PARTF):
+    add_part(kv, 'Vanilla')
+import pzmods
+for src, path in pzmods.mod_files('scripts/**/*.txt'):
+    for kv in parse_blocks(path):
+        if kv.get('MountOn') and kv.get('PartType'):   # weapon parts only
+            add_part(kv, src)
 
 for g in guns:
     ups = [{'name': p['name'], 'slot': p['slot'], 'effects': p['effects']} for p in parts if g['item'] in p['mount']]
@@ -173,7 +190,7 @@ __AUTHOR__
   <b>Recoil</b> delay between shots (lower = faster follow-up) · <b>Aim</b> time to steady · <b>Noise</b> sound radius (higher = attracts more zombies) ·
   <b>Durab</b> ≈ shots before it breaks (ConditionMax × condition-loss rarity) ·
   <b>Upgrades</b> = attachments that fit this gun (scopes, red dots, lasers, choke tubes, recoil pads, slings) — <b>click a row to see each attachment and its effect</b>.
-  Stats are base values before aiming skill, attachments, and condition. Vanilla B42 has no suppressors.
+  Stats are base values before aiming skill, attachments, and condition.__SUPNOTE__
 __TOOLLINK__</footer>
 <script>
 const DATA = __DATA__;
@@ -234,7 +251,9 @@ buildTable({
 });
 </script></body></html>'''
 data_js = pzenv.embed_json(guns)
-html = html.replace('__NAV__', NAV).replace('__DATA__', data_js).replace('__WLJS__', pzbuild.WL_JS).replace('__TABLE_JS__', pzbuild.TABLE_JS).replace('__LINKMAP__', linkmap_js).replace('__AUTHOR__', pzbuild.AUTHOR_META).replace('__TOOLLINK__', pzbuild.TOOL_LINK)
+# suppressors exist only via mods; note their absence when none are installed
+supnote = '' if any('uppressor' in p['name'] for p in parts) else ' Vanilla B42 has no suppressors.'
+html = html.replace('__NAV__', NAV).replace('__DATA__', data_js).replace('__WLJS__', pzbuild.WL_JS).replace('__TABLE_JS__', pzbuild.TABLE_JS).replace('__LINKMAP__', linkmap_js).replace('__AUTHOR__', pzbuild.AUTHOR_META).replace('__TOOLLINK__', pzbuild.TOOL_LINK).replace('__SUPNOTE__', supnote)
 open(pzenv.REPO + '/guns.html','w',encoding='utf-8').write(html)
 nup = sum(1 for g in guns if g['upgrades'])
 print(f"Wrote guns.html ({len(html)} bytes, {len(guns)} firearms, {nup} with upgrades, {len(parts)} parts)")
