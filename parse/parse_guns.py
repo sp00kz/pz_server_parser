@@ -64,16 +64,21 @@ def gun_class(name, kv):
     return 'Firearm'
 
 out = []
-seen_ids = set()
+slot = {}                            # item name -> index in out
 for src, path in [('Vanilla', WEAP)] + pzmods.mod_files('scripts/**/*.txt'):
   for kv in parse_items(path):
-    if kv.get('Ranged') != 'true':   # firearms only
+    # firearms only: B42 mods omit Ranged; AmmoType alone also matches magazines and
+    # zero-damage toys (laser tag), so require real damage
+    if kv.get('Ranged') != 'true' and not (kv.get('AmmoType') and num(kv, 'MaxDamage')):
         continue
     name = kv['__name__']
-    if name in seen_ids:             # first definition wins (vanilla parsed first)
+    if name in slot and src == 'Vanilla':
         continue
-    seen_ids.add(name)
-    out.append({
+    rec_at = slot.get(name)          # mod redefinition of a vanilla gun wins (game load order)
+    if rec_at is not None and out[rec_at]['source'] != 'Vanilla':
+        continue                     # first mod wins among mods
+    slot[name] = len(out) if rec_at is None else rec_at
+    rec = ({
         'item': name,
         'name': names.get(name) or kv.get('DisplayName') or name,
         'source': src,
@@ -99,6 +104,10 @@ for src, path in [('Vanilla', WEAP)] + pzmods.mod_files('scripts/**/*.txt'):
         'condMax': num(kv,'ConditionMax'),
         'condLower': num(kv,'ConditionLowerChanceOneIn'),
     })
+    if rec_at is None:
+        out.append(rec)
+    else:
+        out[rec_at] = rec
 
 out.sort(key=lambda x:(x['category'], x['name']))
 print(f"{len(out)} firearms", file=sys.stderr)

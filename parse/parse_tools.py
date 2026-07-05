@@ -78,6 +78,8 @@ for src, path in [('Vanilla', NORM)] + MOD_FILES:
   for kv in parse_items(path):
     if src != 'Vanilla' and kv.get('Type') == 'Weapon':
         continue   # weapons handled below
+    if kv.get('BodyLocation') or kv.get('ClothingItem'):
+        continue   # clothing (B42 mods declare it via ItemType, not Type)
     d, cmax, lower = durab(kv)
     if lower is None:
         continue

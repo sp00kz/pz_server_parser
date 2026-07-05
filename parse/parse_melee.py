@@ -55,16 +55,18 @@ out = []
 seen_ids = set()
 for src, path in [('Vanilla', WEAP)] + pzmods.mod_files('scripts/**/*.txt'):
   for kv in parse_items(path):
-    if kv.get('Ranged') == 'true' or kv.get('SubCategory') == 'Firearm':
-        continue
+    if kv.get('Ranged') == 'true' or kv.get('SubCategory') == 'Firearm' or kv.get('AmmoType'):
+        continue                     # AmmoType: B42 mod firearms omit Ranged/SubCategory
     mn, mx = num(kv, 'MinDamage'), num(kv, 'MaxDamage')
     if mn is None and mx is None:
         continue
     iid = kv['__id__']
     if iid in seen_ids:              # first definition wins (vanilla parsed first)
         continue
-    seen_ids.add(iid)
     swing = num(kv, 'Swingtime')
+    if src != 'Vanilla' and swing is None:
+        continue                     # mod stub without swing stats (B42 generated format)
+    seen_ids.add(iid)
     cmax = num(kv, 'ConditionMax'); clower = num(kv, 'ConditionLowerChanceOneIn')
     durab = (cmax * clower) if (cmax is not None and clower is not None) else None
     avg = (mn + mx) / 2 if (mn is not None and mx is not None) else None

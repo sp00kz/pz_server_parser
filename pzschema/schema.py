@@ -81,10 +81,10 @@ DATASETS = {
     ("item", STR, False, "id"), ("name", STR, False, "name"), ("category", STR, False, "category"),
     ("source", STR, False, "source"),
     ("ammo", STR), ("mag", NUM), ("minDmg", NUM), ("maxDmg", NUM), ("maxRange", NUM),
-    ("sightRange", NUM), ("hitChance", NUM), ("critChance", NUM), ("critMult", NUM),
-    ("recoil", NUM), ("aimTime", NUM), ("reload", NUM), ("projectiles", NUM),
+    ("sightRange", NUM, True), ("hitChance", NUM), ("critChance", NUM), ("critMult", NUM),
+    ("recoil", NUM), ("aimTime", NUM), ("reload", NUM), ("projectiles", NUM, True),
     ("noise", NUM), ("jamChance", NUM), ("weight", NUM),
-    ("durab", NUM), ("condMax", NUM), ("condLower", NUM))),
+    ("durab", NUM, True), ("condMax", NUM, True), ("condLower", NUM, True))),
 
  "melee": Dataset("melee", "melee.json", _flds(
     ("item", STR, False, "id"), ("name", STR, False, "name"), ("category", STR, False, "category"),
